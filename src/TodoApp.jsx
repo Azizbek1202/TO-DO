@@ -61,7 +61,7 @@ const TodoApp = () => {
         }
     };
 
-    const deletePost = async (id) => {
+    const DeletePost = async (id) => {
         try {
             await axios.delete(`https://jsonplaceholder.typicode.com/posts/${id}`);
             setItem(item.filter((post) => post.id !== id));
@@ -124,7 +124,7 @@ const TodoApp = () => {
                             <Button variant="outlined" color="success" onClick={() => openEditDialog(res)}>
                                 <EditIcon />
                             </Button>
-                            <Button variant="outlined" color="error" onClick={() => deletePost(res?.id)}>
+                            <Button variant="outlined" color="error" onClick={() => DeletePost(res?.id)}>
                                 <DeleteIcon />
                             </Button>
                         </CardActions>
