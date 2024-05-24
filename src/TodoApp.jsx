@@ -34,6 +34,13 @@ const TodoApp = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validation check
+        if (!formData.title.trim() || !formData.body.trim()) {
+            alert("Ma'lumot to'liq emas");
+            return;
+        }
+
         try {
             const response = await axios.post("https://jsonplaceholder.typicode.com/posts", formData);
             setItem([response.data, ...item]);
@@ -90,7 +97,7 @@ const TodoApp = () => {
                 </Toolbar>
             </AppBar>
 
-            <Box  display="flex" justifyContent="center" alignItems="center" flexDirection="column" p={2} mt={8}>
+            <Box display="flex" justifyContent="center" alignItems="center" flexDirection="column" p={2} mt={8}>
                 <Grid container spacing={2} justifyContent="center" direction="column" alignItems="center" sx={{ width: '100%', maxWidth: '600px' }}>
                     <Grid item xs={12} >
                         <form onSubmit={handleSubmit} style={{ width: '100%' }}>
@@ -119,7 +126,7 @@ const TodoApp = () => {
                                 </Grid>
                                 <Grid item xs={12}>
                                     <Button type="submit" variant="outlined" color="primary" fullWidth>
-                                      <PostAddIcon />
+                                        <PostAddIcon />
                                     </Button>
                                 </Grid>
                             </Grid>
