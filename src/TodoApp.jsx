@@ -10,7 +10,6 @@ const TodoApp = () => {
     const [editData, setEditData] = useState({ title: "", body: "", id: null });
     const [open, setOpen] = useState(false);
 
-    // Helper functions to interact with local storage
     const saveToLocalStorage = (data) => {
         localStorage.setItem('todoItems', JSON.stringify(data));
     };
@@ -22,13 +21,11 @@ const TodoApp = () => {
 
     const getItem = async () => {
         try {
-            // Fetch existing posts from local storage
             const localItems = getFromLocalStorage();
             setItem(localItems);
 
-            // Fetch initial posts from the API
             const response = await axios.get("https://jsonplaceholder.typicode.com/posts");
-            const initialItems = response?.data?.slice(0, 10); // Limit to first 10 items for demo
+            const initialItems = response?.data?.slice(0, 10); 
             setItem([...localItems, ...initialItems]);
         } catch (error) {
             console.log("Error fetching items:", error);
@@ -51,13 +48,10 @@ const TodoApp = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validation check
         if (!formData.title.trim() || !formData.body.trim()) {
             alert("Ma'lumot to'liq emas");
             return;
         }
-
-        // Generate a unique ID for the new post
         const newId = item.length ? Math.max(...item.map(post => post.id)) + 1 : 1;
 
         const newPost = {
@@ -84,14 +78,13 @@ const TodoApp = () => {
         try {
             let updatedItems;
             if (editData.id <= 100) {
-                // If the post ID is within the range of the mock API, use the API to update
                 const response = await axios.put(`https://jsonplaceholder.typicode.com/posts/${editData.id}`, {
                     title: editData.title,
                     body: editData.body
                 });
                 updatedItems = item.map((post) => (post.id === editData.id ? response.data : post));
             } else {
-                // Otherwise, update locally
+    
                 updatedItems = item.map((post) => (post.id === editData.id ? editData : post));
             }
             setItem(updatedItems);
@@ -106,10 +99,8 @@ const TodoApp = () => {
     const deletePost = async (id) => {
         try {
             if (id <= 100) {
-                // If the post ID is within the range of the mock API, use the API to delete
                 await axios.delete(`https://jsonplaceholder.typicode.com/posts/${id}`);
             }
-            // Regardless of the ID range, remove the post locally
             const updatedItems = item.filter((post) => post.id !== id);
             setItem(updatedItems);
             saveToLocalStorage(updatedItems);
