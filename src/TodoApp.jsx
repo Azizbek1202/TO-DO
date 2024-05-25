@@ -25,7 +25,7 @@ const TodoApp = () => {
             setItem(localItems);
 
             const response = await axios.get("https://jsonplaceholder.typicode.com/posts");
-            const initialItems = response?.data?.slice(0, 10); 
+            const initialItems = response?.data;
             setItem([...localItems, ...initialItems]);
         } catch (error) {
             console.log("Error fetching items:", error);
