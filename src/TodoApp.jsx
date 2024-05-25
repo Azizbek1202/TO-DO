@@ -10,12 +10,28 @@ const TodoApp = () => {
     const [editData, setEditData] = useState({ title: "", body: "", id: null });
     const [open, setOpen] = useState(false);
 
+    // Helper functions to interact with local storage
+    const saveToLocalStorage = (data) => {
+        localStorage.setItem('todoItems', JSON.stringify(data));
+    };
+
+    const getFromLocalStorage = () => {
+        const savedItems = localStorage.getItem('todoItems');
+        return savedItems ? JSON.parse(savedItems) : [];
+    };
+
     const getItem = async () => {
         try {
+            // Fetch existing posts from local storage
+            const localItems = getFromLocalStorage();
+            setItem(localItems);
+
+            // Fetch initial posts from the API
             const response = await axios.get("https://jsonplaceholder.typicode.com/posts");
-            setItem(response?.data);
+            const initialItems = response?.data?.slice(0, 10); // Limit to first 10 items for demo
+            setItem([...localItems, ...initialItems]);
         } catch (error) {
-            console.log("Error");
+            console.log("Error fetching items:", error);
         }
     };
 
@@ -41,9 +57,19 @@ const TodoApp = () => {
             return;
         }
 
+        // Generate a unique ID for the new post
+        const newId = item.length ? Math.max(...item.map(post => post.id)) + 1 : 1;
+
+        const newPost = {
+            ...formData,
+            id: newId
+        };
+
         try {
-            const response = await axios.post("https://jsonplaceholder.typicode.com/posts", formData);
-            setItem([response.data, ...item]);
+            const response = await axios.post("https://jsonplaceholder.typicode.com/posts", newPost);
+            const updatedItems = [response.data, ...item];
+            setItem(updatedItems);
+            saveToLocalStorage(updatedItems);
             setFormData({ title: "", body: "" });
         } catch (error) {
             console.error("Error creating post:", error);
@@ -56,11 +82,20 @@ const TodoApp = () => {
 
     const handleEditSubmit = async () => {
         try {
-            const response = await axios.put(`https://jsonplaceholder.typicode.com/posts/${editData.id}`, {
-                title: editData.title,
-                body: editData.body
-            });
-            setItem(item.map((post) => (post.id === editData.id ? response.data : post)));
+            let updatedItems;
+            if (editData.id <= 100) {
+                // If the post ID is within the range of the mock API, use the API to update
+                const response = await axios.put(`https://jsonplaceholder.typicode.com/posts/${editData.id}`, {
+                    title: editData.title,
+                    body: editData.body
+                });
+                updatedItems = item.map((post) => (post.id === editData.id ? response.data : post));
+            } else {
+                // Otherwise, update locally
+                updatedItems = item.map((post) => (post.id === editData.id ? editData : post));
+            }
+            setItem(updatedItems);
+            saveToLocalStorage(updatedItems);
             setOpen(false);
             setEditData({ title: "", body: "", id: null });
         } catch (error) {
@@ -70,8 +105,14 @@ const TodoApp = () => {
 
     const deletePost = async (id) => {
         try {
-            await axios.delete(`https://jsonplaceholder.typicode.com/posts/${id}`);
-            setItem(item.filter((post) => post.id !== id));
+            if (id <= 100) {
+                // If the post ID is within the range of the mock API, use the API to delete
+                await axios.delete(`https://jsonplaceholder.typicode.com/posts/${id}`);
+            }
+            // Regardless of the ID range, remove the post locally
+            const updatedItems = item.filter((post) => post.id !== id);
+            setItem(updatedItems);
+            saveToLocalStorage(updatedItems);
         } catch (error) {
             console.error("Error deleting post:", error);
         }
